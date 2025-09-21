@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shoutbox Admin Panel</title>
+<style>
+body { font-family: Arial; background:#f0f8ff; margin:0; padding:0; }
+h2 { text-align:center; }
+#pending, #approved { margin: 20px auto; max-width:800px; background:#fff; padding:15px; border-radius:8px; }
+.msg { border-bottom:1px solid #ddd; padding:6px 0; display:flex; justify-content:space-between; }
+button { margin-left:5px; padding:4px 8px; cursor:pointer; }
+</style>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body>
+
+<h2>Shoutbox Admin Panel</h2>
+
+<h3>Pending Messages</h3>
+<div id="pending">Loading...</div>
+
+<h3>Approved Messages</h3>
+<div id="approved">Loading...</div>
+
+<script>
+// Firebase config
+var firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  databaseURL: "https://mathematics-hub-7087f-default-rtdb.firebaseio.com/",
+  projectId: "mathematics-hub-7087f",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+firebase.initializeApp(firebaseConfig);
+var db = firebase.database();
+
+// Load Pending Messages
+function loadPending(){
+  let container = document.getElementById('pending');
+  container.innerHTML = '';
+  db.ref('shoutbox/shoutbox2').orderByChild('status').equalTo('pending').on('value', snapshot => {
+    container.innerHTML = '';
+    snapshot.forEach(snap => {
+      let data = snap.val();
+      let div = document.createElement('div');
+      div.className='msg';
+      div.innerHTML = `<div><b>${data.name}</b>: ${data.message}</div>
+        <div>
+          <button onclick="approve('${snap.key}')">Approve</button>
+          <button onclick="remove('${snap.key}')">Delete</button>
+        </div>`;
+      container.appendChild(div);
+    });
+  });
+}
+
+// Load Approved Messages
+function loadApproved(){
+  let container = document.getElementById('approved');
+  container.innerHTML='';
+  db.ref('shoutbox/shoutbox2').orderByChild('status').equalTo('approved').on('value', snapshot=>{
+    container.innerHTML='';
+    snapshot.forEach(snap=>{
+      let data = snap.val();
+      let div = document.createElement('div');
+      div.textContent = `${data.name}: ${data.message}`;
+      container.appendChild(div);
+    });
+  });
+}
+
+// Approve message
+function approve(key){
+  db.ref('shoutbox/shoutbox2/'+key).update({status:'approved'});
+}
+
+// Delete message
+function remove(key){
+  db.ref('shoutbox/shoutbox2/'+key).remove();
+}
+
+// Initial load
+loadPending();
+loadApproved();
+</script>
+</body>
+</html>
