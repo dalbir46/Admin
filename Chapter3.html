@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>LaTeX Render Test</title>
+</head>
+<body>
+  <h2>Prime Factors of 140 (via Render LaTeX API)</h2>
+  <p>नीचे का image API से generate हुआ है 👇</p>
+  <img id="output" alt="Rendered LaTeX will appear here"/>
+
+  <script>
+  async function renderMath() {
+    // आपका LaTeX code (Mathpix snippet वाला)
+    const latexCode = `
+    Express each number as a product of its prime factors:
+    (i) 140
+
+    \\begin{tabular}{r|r}
+    2 & 140 \\\\
+    \\hline 2 & 70 \\\\
+    \\hline 5 & 35 \\\\
+    \\hline 7 & 7 \\\\
+    \\hline & 1
+    \\end{tabular}
+
+    Hence,
+    $$
+    \\begin{aligned}
+    \\mathbf{140} &= 2 \\times 2 \\times 5 \\times 7 \\\\
+    &= 2^2 \\times 5 \\times 7
+    \\end{aligned}
+    $$
+    `;
+
+    let res = await fetch("https://admin-pannel-1l76.onrender.com/compile", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ latex: latexCode })
+    });
+
+    if (!res.ok) {
+      document.getElementById("output").alt = "Error: API call failed!";
+      return;
+    }
+
+    let blob = await res.blob();
+    document.getElementById("output").src = URL.createObjectURL(blob);
+  }
+
+  // Page load होते ही run हो जाएगा
+  renderMath();
+  </script>
+</body>
+</html>
