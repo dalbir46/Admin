@@ -1,56 +1,48 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
-import subprocess
-import tempfile
-import os
+import io, base64
+import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('Agg')
 
 app = Flask(__name__)
-CORS(app)  # CORS enable
+CORS(app)
 
+# Home route - सिर्फ टेस्ट के लिए
 @app.route("/")
 def home():
     return "✅ Flask LaTeX API is running on Render!"
 
+# POST API → LaTeX को PNG में convert करके Base64 return करेगा
 @app.route("/latex", methods=["POST"])
-def render_latex():
-    try:
-        data = request.get_json()
-        latex_code = data.get("latex", "")
+def latex_to_png():
+    data = request.json
+    latex_code = data.get("latex", "")
 
-        if not latex_code:
-            return jsonify({"error": "No LaTeX code provided"}), 400
+    fig, ax = plt.subplots()
+    ax.axis("off")
+    ax.text(0.5, 0.5, f"${latex_code}$", fontsize=20, ha="center", va="center")
 
-        # temporary directory for output
-        with tempfile.TemporaryDirectory() as tmpdir:
-            tex_file = os.path.join(tmpdir, "equation.tex")
-            pdf_file = os.path.join(tmpdir, "equation.pdf")
-            png_file = os.path.join(tmpdir, "equation.png")
+    buf = io.BytesIO()
+    plt.savefig(buf, format="png", bbox_inches="tight", dpi=200)
+    buf.seek(0)
 
-            # write latex file
-            with open(tex_file, "w") as f:
-                f.write(r"""
-\documentclass[12pt]{article}
-\usepackage{amsmath}
-\pagestyle{empty}
-\begin{document}
-%s
-\end{document}
-""" % latex_code)
+    image_base64 = base64.b64encode(buf.read()).decode("utf-8")
+    return jsonify({"image_base64": image_base64})
 
-            # run pdflatex → dvisvgm / imagemagick (assume installed)
-            subprocess.run(["pdflatex", "-interaction=nonstopmode", tex_file], cwd=tmpdir, check=True)
-            subprocess.run(["convert", "-density", "200", pdf_file, "-quality", "90", png_file], check=True)
+# GET API → Example equation render करके सीधा PNG दिखाएगा
+@app.route("/render")
+def render_example():
+    latex_code = r"x^2 + y^2 = z^2"  # Example
+    fig, ax = plt.subplots()
+    ax.axis("off")
+    ax.text(0.5, 0.5, f"${latex_code}$", fontsize=20, ha="center", va="center")
 
-            # read image as base64
-            with open(png_file, "rb") as imgf:
-                import base64
-                encoded = base64.b64encode(imgf.read()).decode("utf-8")
+    buf = io.BytesIO()
+    plt.savefig(buf, format="png", bbox_inches="tight", dpi=200)
+    buf.seek(0)
 
-            return jsonify({"image_base64": encoded})
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
+    return send_file(buf, mimetype="image/png")
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=10000)
