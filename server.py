@@ -21,5 +21,6 @@ def render_latex():
 
     buf = io.BytesIO()
     plt.savefig(buf, format="png", bbox_inches="tight", dpi=200)
+    plt.close(fig)
     buf.seek(0)
     return send_file(buf, mimetype="image/png")
