@@ -1,8 +1,10 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS   # ✅ Add this
 import io, base64, requests
 import matplotlib.pyplot as plt
 
 app = Flask(__name__)
+CORS(app)  # ✅ Enable CORS so browser can call API
 
 IMGBB_API_KEY = "9a1627658ec3732fd03cb87cbff0ed66"  # 🔑 आपकी imgbb API key
 
@@ -34,7 +36,7 @@ def render():
         "key": IMGBB_API_KEY,
         "image": base64.b64encode(buf.read()).decode("utf-8")  # ✅ decode to string
     }
-    r = requests.post(url, data=payload)  # ✅ fixed (data=payload)
+    r = requests.post(url, data=payload)  # ✅ Correct way (data=payload)
     res = r.json()
 
     if "data" in res:
