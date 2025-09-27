@@ -1,45 +1,74 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS   # ✅ Add this
-import io, base64, requests
-import matplotlib.pyplot as plt
+import subprocess, os, io, base64, requests, uuid
 
 app = Flask(__name__)
-CORS(app)  # ✅ Enable CORS so browser can call API
 
-IMGBB_API_KEY = "9a1627658ec3732fd03cb87cbff0ed66"  # 🔑 आपकी imgbb API key
+IMGBB_API_KEY = "9a1627658ec3732fd03cb87cbff0ed66"  # 🔑 imgbb API key
 
-# Home route so that "/" works
 @app.route("/")
 def home():
-    return "✅ Flask API is running on Render!"
+    return "✅ Flask LaTeX API is running!"
 
 @app.route("/render", methods=["POST"])
 def render():
     data = request.get_json()
-    latex = data.get("latex", "")
+    latex_code = data.get("latex", "")
 
-    if not latex:
+    if not latex_code:
         return jsonify({"error": "No LaTeX provided"}), 400
 
-    # LaTeX से image बनाओ
-    fig, ax = plt.subplots()
-    ax.text(0.5, 0.5, f"${latex}$", fontsize=20, ha="center", va="center")
-    ax.axis("off")
+    # Temporary filenames
+    job_id = str(uuid.uuid4())
+    tex_file = f"/tmp/{job_id}.tex"
+    pdf_file = f"/tmp/{job_id}.pdf"
+    png_file = f"/tmp/{job_id}.png"
 
-    buf = io.BytesIO()
-    plt.savefig(buf, format="png", bbox_inches="tight", pad_inches=0.5)
-    buf.seek(0)
+    # Full LaTeX document
+    tex_content = f"""
+    \\documentclass[preview]{{standalone}}
+    \\usepackage{{amsmath, amssymb}}
+    \\usepackage{{array}}
+    \\begin{document}
+    {latex_code}
+    \\end{document}
+    """
 
-    # imgbb पर upload करो
-    url = "https://api.imgbb.com/1/upload"
-    payload = {
-        "key": IMGBB_API_KEY,
-        "image": base64.b64encode(buf.read()).decode("utf-8")  # ✅ decode to string
-    }
-    r = requests.post(url, data=payload)  # ✅ Correct way (data=payload)
-    res = r.json()
+    # Write .tex file
+    with open(tex_file, "w") as f:
+        f.write(tex_content)
 
-    if "data" in res:
-        return jsonify({"image_url": res["data"]["url"]})
-    else:
-        return jsonify({"error": "Upload failed", "details": res})
+    try:
+        # Compile LaTeX → PDF
+        subprocess.run(
+            ["pdflatex", "-interaction=nonstopmode", "-output-directory", "/tmp", tex_file],
+            check=True, capture_output=True
+        )
+
+        # Convert PDF → PNG
+        subprocess.run(
+            ["gs", "-sDEVICE=pngalpha", "-o", png_file, "-r150", pdf_file],
+            check=True, capture_output=True
+        )
+
+        # Upload to imgbb
+        with open(png_file, "rb") as f:
+            payload = {
+                "key": IMGBB_API_KEY,
+                "image": base64.b64encode(f.read()).decode("utf-8")
+            }
+        r = requests.post("https://api.imgbb.com/1/upload", data=payload)
+        res = r.json()
+
+        if "data" in res:
+            return jsonify({"image_url": res["data"]["url"]})
+        else:
+            return jsonify({"error": "Upload failed", "details": res})
+
+    except subprocess.CalledProcessError as e:
+        return jsonify({"error": "LaTeX compilation failed", "details": e.stderr.decode("utf-8")})
+
+    finally:
+        # Cleanup
+        for f in [tex_file, pdf_file, png_file, f"/tmp/{job_id}.aux", f"/tmp/{job_id}.log"]:
+            if os.path.exists(f):
+                os.remove(f)
