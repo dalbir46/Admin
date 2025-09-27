@@ -1,74 +1,54 @@
 from flask import Flask, request, jsonify
-import subprocess, os, io, base64, requests, uuid
+from flask_cors import CORS
+import io, base64, requests
+import matplotlib.pyplot as plt
 
 app = Flask(__name__)
+CORS(app)  # ✅ CORS enabled for all origins
 
-IMGBB_API_KEY = "9a1627658ec3732fd03cb87cbff0ed66"  # 🔑 imgbb API key
+IMGBB_API_KEY = "9a1627658ec3732fd03cb87cbff0ed66"  # 🔑 Tumhari ImgBB key
 
+# ✅ Home route (Render health check)
 @app.route("/")
 def home():
-    return "✅ Flask LaTeX API is running!"
+    return "✅ Flask LaTeX API is running on Render!"
 
+# ✅ Render route
 @app.route("/render", methods=["POST"])
 def render():
-    data = request.get_json()
-    latex_code = data.get("latex", "")
-
-    if not latex_code:
-        return jsonify({"error": "No LaTeX provided"}), 400
-
-    # Temporary filenames
-    job_id = str(uuid.uuid4())
-    tex_file = f"/tmp/{job_id}.tex"
-    pdf_file = f"/tmp/{job_id}.pdf"
-    png_file = f"/tmp/{job_id}.png"
-
-    # Full LaTeX document
-    tex_content = f"""
-    \\documentclass[preview]{{standalone}}
-    \\usepackage{{amsmath, amssymb}}
-    \\usepackage{{array}}
-    \\begin{document}
-    {latex_code}
-    \\end{document}
-    """
-
-    # Write .tex file
-    with open(tex_file, "w") as f:
-        f.write(tex_content)
-
     try:
-        # Compile LaTeX → PDF
-        subprocess.run(
-            ["pdflatex", "-interaction=nonstopmode", "-output-directory", "/tmp", tex_file],
-            check=True, capture_output=True
-        )
+        data = request.get_json()
+        latex = data.get("latex", "")
 
-        # Convert PDF → PNG
-        subprocess.run(
-            ["gs", "-sDEVICE=pngalpha", "-o", png_file, "-r150", pdf_file],
-            check=True, capture_output=True
-        )
+        if not latex:
+            return jsonify({"error": "No LaTeX provided"}), 400
 
-        # Upload to imgbb
-        with open(png_file, "rb") as f:
-            payload = {
-                "key": IMGBB_API_KEY,
-                "image": base64.b64encode(f.read()).decode("utf-8")
-            }
-        r = requests.post("https://api.imgbb.com/1/upload", data=payload)
+        # --- Create LaTeX image ---
+        fig, ax = plt.subplots()
+        ax.text(0.5, 0.5, f"${latex}$", fontsize=20, ha="center", va="center")
+        ax.axis("off")
+
+        buf = io.BytesIO()
+        plt.savefig(buf, format="png", bbox_inches="tight", pad_inches=0.5)
+        buf.seek(0)
+
+        # --- Upload to ImgBB ---
+        url = "https://api.imgbb.com/1/upload"
+        payload = {
+            "key": IMGBB_API_KEY,
+            "image": base64.b64encode(buf.read()).decode("utf-8")
+        }
+        r = requests.post(url, data=payload)
         res = r.json()
 
         if "data" in res:
             return jsonify({"image_url": res["data"]["url"]})
         else:
-            return jsonify({"error": "Upload failed", "details": res})
+            return jsonify({"error": "Upload failed", "details": res}), 500
 
-    except subprocess.CalledProcessError as e:
-        return jsonify({"error": "LaTeX compilation failed", "details": e.stderr.decode("utf-8")})
+    except Exception as e:
+        return jsonify({"error": "Server error", "details": str(e)}), 500
 
-    finally:
-        # Cleanup
-        for f in [tex_file, pdf_file, png_file, f"/tmp/{job_id}.aux", f"/tmp/{job_id}.log"]:
-            if os.path.exists(f):
-                os.remove(f)
+# ✅ Run locally (Render uses gunicorn)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
