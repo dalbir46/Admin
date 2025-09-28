@@ -1,0 +1,106 @@
+<!--
+GitHub Pages + MathJax demo (single-file)
+
+How to use:
+1. Put this file at the root of your repo as `index.html`.
+2. Create a folder named `images/` and put your screenshot inside as `images/screenshot.jpg` (or update the <img> src accordingly).
+3. Commit & push to GitHub and enable Pages for the repo (branch: main, folder: /).
+4. Visit: https://<your-github-username>.github.io/<your-repo-name>/
+
+Replace the placeholder image path if you use a different filename.
+-->
+
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MathJax Demo — Screenshot → Math</title>
+  <!-- MathJax v3 (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    body{font-family: Arial, Helvetica, sans-serif; padding:20px; line-height:1.5}
+    .wrap{display:flex;gap:30px;align-items:flex-start;flex-wrap:wrap}
+    .card{box-shadow:0 1px 4px rgba(0,0,0,0.08);padding:14px;border-radius:8px;background:#fff}
+    .left{flex:0 0 360px}
+    .left img{max-width:100%;height:auto;border:1px solid #ddd}
+    .right{flex:1;min-width:280px}
+    h1{font-size:18px;margin:0 0 12px}
+    .note{color:#555;font-size:13px;margin-top:8px}
+    pre{background:#f7f7f7;padding:10px;border-radius:6px;overflow:auto}
+  </style>
+</head>
+<body>
+  <h1>Screenshot → MathJax demo (ready for GitHub Pages)</h1>
+  <div class="wrap">
+    <div class="card left">
+      <strong>Original screenshot (place your file at <code>images/screenshot.jpg</code>)</strong>
+      <div style="margin-top:8px">
+        <img src="images/screenshot.jpg" alt="screenshot (replace with your file)">
+      </div>
+    </div>
+
+    <div class="card right">
+      <strong>MathJax version (editable)</strong>
+      <div style="margin-top:10px">
+        <p><em>Note:</em> Replace or add LaTeX below to match other screenshots.</p>
+
+        <!-- MathJax rendered content (example: factorisation 26 and 91) -->
+        <div>
+          <p><b>Ex 1.2 , 2 (Method 1)</b></p>
+          <p>Find the LCM and HCF of the following pairs of integers and verify that <br>
+            \( \text{LCM} \times \text{HCF} = \text{product of the two numbers} \).</p>
+
+          <p><b>(i) 26 and 91</b></p>
+
+          <div style="display:flex;gap:30px;align-items:flex-start">
+            <div>
+              \[
+              \begin{array}{r|r}
+               2 & 26 \\ \hline
+              13 & 13 \\ \hline
+                 & 1
+              \end{array}
+              \]
+            </div>
+
+            <div>
+              \[
+              \begin{array}{r|r}
+               7 & 91 \\ \hline
+              13 & 13 \\ \hline
+                 & 1
+              \end{array}
+              \]
+            </div>
+          </div>
+
+          <p>\(26 = 2 \times 13 = 2^1 \times 13^1\)</p>
+          <p>\(91 = 7 \times 13 = 7^1 \times 13^1\)</p>
+
+          <p>\(\text{H.C.F} = \text{Product of smallest power of each common prime factor}\)</p>
+          <p>\(= 13\)</p>
+
+          <p>\(\text{L.C.M} = \text{Product of greatest power of each prime factor}\)</p>
+          <p>\(= 2 \times 13 \times 7 = 182\)</p>
+
+        </div>
+      </div>
+
+      <div class="note">Tip: To edit this MathJax text, open the file and change the LaTeX between \( ... \) or $$ ... $$ blocks. Save & push to GitHub to update the page.</div>
+    </div>
+  </div>
+
+  <hr style="margin:20px 0">
+  <div class="card" style="margin-top:8px">
+    <strong>Short instructions (what this file contains)</strong>
+    <ul>
+      <li>This single-file demo shows the original screenshot (left) and MathJax-rendered solution (right).</li>
+      <li>Place your actual screenshot at <code>images/screenshot.jpg</code> or edit the &lt;img&gt; path.</li>
+      <li>Commit & push to your GitHub repo (index.html at root). Enable GitHub Pages for the repo (branch: main, folder: /).</li>
+      <li>Open your GitHub Pages URL: <code>https://&lt;username&gt;.github.io/&lt;repo&gt;/</code></li>
+    </ul>
+  </div>
+
+</body>
+</html>
