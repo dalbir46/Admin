@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Class 10 - Mathematics Hub</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background:#f9fafb;
+      color:#0b2447;
+    }
+    header {
+      background:#0b2447;
+      color:#fff;
+      padding:16px;
+      border-radius:10px;
+      text-align:center;
+    }
+    h1 { margin:0; font-size:24px; }
+    p { margin:8px 0; color:#444; }
+    .chapter {
+      background:#e4e7eb;
+      padding:12px;
+      margin:10px 0;
+      border-radius:8px;
+      transition:all .2s;
+    }
+    .chapter:hover { background:#d4d7db; }
+    a {
+      color:#0b2447;
+      text-decoration:none;
+      font-weight:600;
+      display:block;
+    }
+    a:hover { text-decoration:underline; }
+    footer {
+      margin-top:30px;
+      padding:12px;
+      text-align:center;
+      background:#e4e7eb;
+      border-radius:8px;
+      font-size:14px;
+      color:#555;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Class 10 Mathematics</h1>
+    <p>Notes • NCERT Solutions • Practice Papers</p>
+  </header>
+
+  <h2>📘 Chapters</h2>
+
+  <div class="chapter"><a href="#">Chapter 1: Real Numbers</a></div>
+  <div class="chapter"><a href="#">Chapter 2: Polynomials</a></div>
+  <div class="chapter"><a href="#">Chapter 3: Pair of Linear Equations</a></div>
+  <div class="chapter"><a href="#">Chapter 4: Quadratic Equations</a></div>
+  <div class="chapter"><a href="#">Chapter 5: Arithmetic Progressions</a></div>
+  <div class="chapter"><a href="#">Chapter 6: Triangles</a></div>
+  <div class="chapter"><a href="#">Chapter 7: Coordinate Geometry</a></div>
+  <div class="chapter"><a href="#">Chapter 8: Introduction to Trigonometry</a></div>
+  <div class="chapter"><a href="#">Chapter 9: Some Applications of Trigonometry</a></div>
+  <div class="chapter"><a href="#">Chapter 10: Circles</a></div>
+  <div class="chapter"><a href="#">Chapter 11: Constructions</a></div>
+  <div class="chapter"><a href="#">Chapter 12: Areas Related to Circles</a></div>
+  <div class="chapter"><a href="#">Chapter 13: Surface Areas and Volumes</a></div>
+  <div class="chapter"><a href="#">Chapter 14: Statistics</a></div>
+  <div class="chapter"><a href="#">Chapter 15: Probability</a></div>
+
+  <p><a href="../index.html">⬅ Back to Home</a></p>
+
+  <footer>
+    © 2025 Awareness Academy | Class 10 Mathematics
+  </footer>
+</body>
+  </html>
+                         
